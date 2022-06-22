@@ -1,10 +1,12 @@
-import socket
+from socket import socket, AF_PACKET, SOCK_RAW, ntohs, inet_ntoa
 from struct import unpack
 
 
 def unpack_link_layer(data):
     dest_mac, src_mac, prototype = unpack('! 6s 6s 2s', data[0:14])
-    return {'dest_mac': dest_mac.hex(), 'src_mac': src_mac.hex(), 'prototype': prototype.hex()}, data[14:]
+    return {'dest_mac': dest_mac.hex(),
+            'src_mac': src_mac.hex(),
+            'prototype': prototype.hex()}, data[14:]
 
 
 def unpack_network_layer(data):
@@ -18,13 +20,21 @@ def unpack_network_layer(data):
     flags = data[4].hex()
     ttl = data[5]
     protocol = data[6]
-    check_sum = data[7].hex()
-    src_ip = socket.inet_ntoa(data[8])
-    dest_ip = socket.inet_ntoa(data[9])
+    checksum = data[7].hex()
+    src_ip = inet_ntoa(data[8])
+    dest_ip = inet_ntoa(data[9])
 
-    return {'version': version, 'length': length, 'diffserv': diffserv, 'total_length': total_length,
-            'id': id, 'flags': flags, 'ttl': ttl, 'protocol': protocol, 'check_sum_ip': check_sum,
-            'src_ip': src_ip, 'dest_ip': dest_ip}, data_copy[length:]
+    return {'version': version,
+            'length': length,
+            'diffserv': diffserv,
+            'total_length': total_length,
+            'id': id,
+            'flags': flags,
+            'ttl': ttl,
+            'protocol': protocol,
+            'checksum_ip': checksum,
+            'src_ip': src_ip,
+            'dest_ip': dest_ip}, data_copy[length:]
 
 
 def unpack_tcp(data):
@@ -36,17 +46,22 @@ def unpack_tcp(data):
     offset = data[4] >> 12
     flags = data[4] & 0xFFF
     window_size = data[5]
-    check_sum_tcp = data[6].hex()
+    checksum_tcp = data[6].hex()
     urgent_pointer = data[7].hex()
 
-    return {'src_port': src_port, 'dest_port': dest_port, 'seq_num': seq_num, 'ack_num': ack_num,
-            'offset': offset, 'flags': flags, 'window_size': window_size,
-            'check_sum_tcp': check_sum_tcp, 'urgent_pointer': urgent_pointer}, data[20:]
+    return {'src_port': src_port,
+            'dest_port': dest_port,
+            'seq_num': seq_num,
+            'ack_num': ack_num,
+            'offset': offset,
+            'flags': flags,
+            'window_size': window_size,
+            'checksum_tcp': checksum_tcp,
+            'urgent_pointer': urgent_pointer}, data[20:]
 
 
 if __name__ == '__main__':
-    conn = socket.socket(socket.AF_PACKET, socket.SOCK_RAW,
-                         socket.ntohs(0x0003))
+    conn = socket(AF_PACKET, SOCK_RAW, ntohs(0x0003))
     while True:
         raw_data, _ = conn.recvfrom(65535)
         info_link, network = unpack_link_layer(raw_data)
@@ -55,4 +70,4 @@ if __name__ == '__main__':
             info_tcp, _ = unpack_tcp(transport)
             if info_tcp['flags'] & 0b010010 == 0b010010:  # is syn-ack?
                 print(
-                    f"port {info_tcp['src_port']} is open on {info_network['src_ip']}")
+                    f"Port {info_tcp['src_port']} is open on {info_network['src_ip']}")

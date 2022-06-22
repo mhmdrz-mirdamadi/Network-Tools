@@ -1,0 +1,7 @@
+10.10.10.10         # Destination IP address
+80                  # Destination port number
+20.20.20.20         # Interface IP address
+3000                # Source IP address
+eth0                # Interface name
+ff aa 22 88 77 dd   # Interface MAC address
+bb 66 44 33 00 cc   # Subnet Gateway MAC address
