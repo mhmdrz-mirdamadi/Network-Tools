@@ -17,3 +17,5 @@ if __name__ == '__main__':
             sock.connect((dest_ip, port))
         except:
             sock.close()
+        finally:
+            print(f'Sent TCP SYN packet to port {port}')
