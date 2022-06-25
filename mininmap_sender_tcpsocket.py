@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='args')
-    parser.add_argument('-t', default=1, type=int,
+    parser.add_argument('-t', default=5, type=float,
                         help='Timeout for TCP connection in milliseconds')
     args = parser.parse_args()
 
