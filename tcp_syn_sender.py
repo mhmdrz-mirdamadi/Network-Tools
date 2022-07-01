@@ -118,4 +118,4 @@ def syn_sender(destination_MAC=dest_mac,
 
 if __name__ == '__main__':
     if syn_sender():
-        print(f'Sent TCP SYN packet to on {interface}')
+        print(f'Sent TCP SYN packet to {lines[0][:-1]} on {interface}')
